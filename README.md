@@ -9,10 +9,10 @@ Hakyll project for building the Savanna Model static site
 ```
 $ npm install
 $ cd semantic
-$ gulp build
+$ npx gulp build
 ```
 
-Use `gulp watch` for frequent changes to Semantic UI source files.
+Use `npx gulp watch` for frequent changes to Semantic UI source files.
 
 ### Hakyll site exectuable
 
