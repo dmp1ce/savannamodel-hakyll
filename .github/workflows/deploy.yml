@@ -1,0 +1,91 @@
+name: Build and Deploy
+
+on:
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source repo
+        uses: actions/checkout@v4
+
+      - name: Setup Haskell
+        uses: haskell-actions/setup@v2
+        with:
+          enable-stack: true
+          stack-no-updates: true
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Cache Stack
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.stack
+            .stack-work
+          key: ${{ runner.os }}-stack-${{ hashFiles('stack.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-stack-
+
+      - name: Cache npm
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-npm-${{ hashFiles('package.json') }}
+          restore-keys: |
+            ${{ runner.os }}-npm-
+
+      - name: Install npm dependencies
+        run: npm install
+
+      - name: Build Semantic UI
+        run: cd semantic && npx gulp build
+
+      - name: Build Hakyll site executable
+        run: stack build
+
+      - name: Generate site
+        run: stack exec -- site build
+
+      - name: Setup SSH for deploy
+        env:
+          DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}
+        run: |
+          mkdir -p ~/.ssh
+          echo "$DEPLOY_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan github.com >> ~/.ssh/known_hosts
+          eval "$(ssh-agent -s)"
+          ssh-add ~/.ssh/deploy_key
+
+      - name: Clone website repo
+        env:
+          GIT_SSH_COMMAND: "ssh -i ~/.ssh/deploy_key"
+        run: |
+          git clone git@github.com:dmp1ce/savannamodel-website.git /tmp/savannamodel-website
+
+      - name: Sync built site
+        run: |
+          rsync -av --delete _site/ /tmp/savannamodel-website/docs/
+
+      - name: Commit and push
+        env:
+          GIT_SSH_COMMAND: "ssh -i ~/.ssh/deploy_key"
+        run: |
+          cd /tmp/savannamodel-website
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git diff --staged --quiet && echo "No changes to deploy" && exit 0
+          git commit -m "Deploy from savannamodel-hakyll@${{ github.sha }}"
+          git push origin master
