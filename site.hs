@@ -1,9 +1,8 @@
 module Main where
 
 --------------------------------------------------------------------------------
-import           Data.Monoid ((<>))
 import           Data.Maybe (fromMaybe)
-import           Data.List (sortOn, intersect, intercalate)
+import           Data.List (sortOn, intercalate)
 import           Text.Read (readMaybe)
 import           System.FilePath (takeDirectory, takeFileName, splitDirectories, joinPath)
 import           Control.Monad (filterM)
@@ -92,31 +91,11 @@ main = hakyll $ do
     match "quotes/*" $ compile getResourceBody
     match "colors/sections/**" $ compile getResourceBody
 
--- | Return only the color item specified in color metadata
-findColor :: MonadMetadata m => String -> [String] -> [Item a] -> m (Maybe (Item a))
-findColor colorname fCats colors =
-  let f :: MonadMetadata m => String ->  Item a -> m Bool
-      f cn (Item i _) = do mc <- getMetadataField i "color"
-                           cTags <- getTags i
-                           return (mc == Just cn && (not . null) (cTags `intersect` fCats))
-      head' (x:_) = Just x
-      head' [] = Nothing
-  in head' <$> filterM (f colorname) colors
-
 -- | Obtain categories from a page. Modified from Hakyll function with the same name.
 getCategory' :: MonadMetadata m => Identifier -> m [String]
 getCategory' = return . tail' . splitDirectories . takeDirectory . toFilePath
   where tail' (_:xs) = xs; tail' _ = []
 
-
--- | Sort items by metadata string
-sortItems :: MonadMetadata m => String -> [Item a] -> m [Item a]
-sortItems s is = do
-  is' <- mapM (\i -> do
-                  ord <- getMetadataField (itemIdentifier i) s
-                  return (ord,i)
-              ) is
-  return $ map snd $ sortOn fst is'
 
 -- | Sort quotes
 sortQuotes :: MonadMetadata m => [Item a] -> m [Item a]

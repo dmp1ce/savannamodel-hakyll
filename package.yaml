@@ -1,5 +1,5 @@
 name: savannamodel
-version: '0.2.0.0'
+version: '2.0.0.0'
 synopsis: Savanna Model website builder
 license: PublicDomain
 author: David Parrish
@@ -18,6 +18,7 @@ ghc-options:
   - -O2
   - -Wall
   - -Wcompat
+  - -Werror
   - -Wincomplete-record-updates
   - -Wincomplete-uni-patterns
   - -Wredundant-constraints
