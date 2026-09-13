@@ -2,23 +2,17 @@
   "name": "savannamodel-hakyll",
   "version": "1.2.0",
   "description": "Hakyll project for building the Savanna Model static site",
-  "main": "index.js",
-  "dependencies": {
-    "fomantic-ui": "^2.9.4",
-    "gulp": "^5.0.0",
-    "gulp-json-editor": "^2.5.4",
-    "inquirer": "^7.1.0",
-    "npm-check-updates": "^4.1.2"
-  },
-  "devDependencies": {},
+  "private": true,
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "cd semantic && npx gulp build",
+    "watch": "cd semantic && npx gulp watch"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/dmp1ce/savannamodel-hakyll.git"
   },
   "keywords": [
+    "hakyll",
     "semantic-ui"
   ],
   "author": "David Parrish",
@@ -26,5 +20,8 @@
   "bugs": {
     "url": "https://github.com/dmp1ce/savannamodel-hakyll/issues"
   },
-  "homepage": "https://github.com/dmp1ce/savannamodel-hakyll#readme"
+  "homepage": "https://github.com/dmp1ce/savannamodel-hakyll#readme",
+  "dependencies": {
+    "fomantic-ui": "^2.9.4"
+  }
 }
