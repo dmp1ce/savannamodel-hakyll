@@ -8,6 +8,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 and versions follow [Semantic Versioning](https://semver.org/): MAJOR for
 redesigns, MINOR for new features, PATCH for fixes and content updates.
 
+## [2.0.1] - 2026-09-13
+
+### Fixed
+- Corrected 15 quote citations (11 wrong page numbers, 4 attributed to the
+  wrong book) using automated verification of every quote against the
+  extracted text of both books. A handful of quotes that span a page break
+  remain flagged for manual review in the builder workspace.
+
 ## [2.0.0] - 2026-09-13
 
 ### Added
