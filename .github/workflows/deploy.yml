@@ -26,7 +26,8 @@ jobs:
         uses: haskell-actions/setup@v2
         with:
           enable-stack: true
-          stack-no-updates: true
+          stack-no-global: true
+          stack-setup-ghc: true
 
       - name: Setup Node.js
         uses: actions/setup-node@v4

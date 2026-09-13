@@ -2,7 +2,7 @@ module Main where
 
 --------------------------------------------------------------------------------
 import           Data.Maybe (fromMaybe)
-import           Data.List (sortOn, intercalate)
+import           Data.List (sortOn, intercalate, uncons)
 import           Text.Read (readMaybe)
 import           System.FilePath (takeDirectory, takeFileName, splitDirectories, joinPath)
 import           Control.Monad (filterM)
@@ -32,8 +32,8 @@ main = hakyll $ do
       compile $ do
 
         -- Get color context
-        color <- head <$> (getUnderlying >>= getCategory')
-        cats <- tail <$> (getUnderlying >>= getCategory')
+        colorCategories <- getUnderlying >>= getCategory'
+        (color, cats) <- maybe (fail "no color category in food path") return (uncons colorCategories)
         colorItem <- applyAsTemplate (constField "color" color)
                      =<< load (fromFilePath $ "colors/sections/" ++ color ++ ".html")
         colorQuotes <- loadAll $ fromGlob $ "colors/sections/" ++ joinPath (color : cats) ++ "/*"
