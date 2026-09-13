@@ -26,6 +26,7 @@ main = hakyll $ do
       compile copyFileCompiler
 
     match "about.markdown" $ pageRules "page-about"
+    match "changelog.markdown" $ pageRules "page-changelog"
 
     match (complement "foods/**/metadata" .&&. "foods/**") $ do
       route $ setExtension "html"
@@ -44,6 +45,7 @@ main = hakyll $ do
           Just foodtag -> filterQuotes foodtag =<< loadAll "quotes/*"
           Nothing -> return []
         let foodCtx =
+                siteVersion <>
                 defaultContext <>
                 constField "color" color <>
                 constField "food-categories" (intercalate ", " cats) <>
@@ -63,6 +65,7 @@ main = hakyll $ do
         compile $ do
           let foodsCtx =
                 constField "page-foods" "" <>
+                siteVersion <>
                 listField "food-color-sections" defaultContext loadFoodTable <>
                 defaultContext
 
@@ -76,6 +79,7 @@ main = hakyll $ do
         compile $ do
             let indexCtx =
                     constField "page-home" "" <>
+                    siteVersion <>
                     defaultContext
 
             getResourceBody
@@ -145,12 +149,18 @@ filterQuotes foodtag ids =
 pageRules :: String -> Rules ()
 pageRules pageLabel = do
       let ctx = constField pageLabel "" <>
+                siteVersion <>
                 defaultContext
 
       route   $ setExtension "html"
       compile $ pandocCompiler
         >>= loadAndApplyTemplate "templates/default.html" ctx
         >>= relativizeUrls
+
+-- | Site version read from the VERSION file, displayed in the site footer.
+siteVersion :: Context a
+siteVersion = field "site-version" $ \_ ->
+  unsafeCompiler $ takeWhile (/= '\n') <$> readFile "VERSION"
 
 loadFoodTable :: Compiler [Item String]
 loadFoodTable = do

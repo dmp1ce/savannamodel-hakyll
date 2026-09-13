@@ -2,6 +2,20 @@
 
 Hakyll project for building the Savanna Model static site
 
+## Releases
+
+Every deployment should get a version bump and a changelog entry:
+
+1. Add an entry to `changelog.markdown` describing the changes.
+2. Increment the version in `VERSION` (semantic versioning: MAJOR for
+   redesigns, MINOR for new features, PATCH for fixes and content updates).
+   Keep `package.yaml` and `package.json` versions aligned.
+3. Commit and push to `master` — GitHub Actions builds and deploys
+   automatically.
+
+The version from `VERSION` is shown in the site footer, and the changelog is
+published at <https://savannamodel.info/changelog.html>.
+
 ## Build
 
 ### Nix shell (optional)
