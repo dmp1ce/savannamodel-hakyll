@@ -5,3 +5,10 @@ packages:
 
 extra-deps:
   - hakyll-4.17.0.0@sha256:97b805ea02e5b721cdb7ab2604397731b050ee98ddf86d9f5debdd613c087897,10604
+
+# Local NixOS builds: stack's nix integration defaults to a pure
+# environment that hides tools from the surrounding nix-shell (e.g.
+# pkg-config needed by the digest package). Inherit the ambient PATH.
+# Ignored on non-NixOS (CI on Ubuntu).
+nix:
+  pure: false

@@ -9,5 +9,7 @@ pkgs.mkShell {
     pkgs.stack
     pkgs.haskell.compiler.ghc9103
     pkgs.rsync
+    pkgs.pkg-config
+    pkgs.zlib
   ];
 }
