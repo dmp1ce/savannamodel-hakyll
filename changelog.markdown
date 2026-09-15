@@ -8,6 +8,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 and versions follow [Semantic Versioning](https://semver.org/): MAJOR for
 redesigns, MINOR for new features, PATCH for fixes and content updates.
 
+## [2.0.4] - 2026-09-15
+
+### Fixed
+- 29 more food pages still had broken `1024px` Wikimedia thumbnails. The
+  v2.0.2 fix pipeline only re-tested URLs the audit had marked *dead*,
+  silently skipping the ones the audit flagged as *fixable* (broken size
+  but a working standard size exists). All rewritten to working sizes,
+  and the resolver now processes fixable entries too.
+
 ## [2.0.3] - 2026-09-15
 
 ### Fixed
