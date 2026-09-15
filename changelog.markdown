@@ -8,6 +8,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 and versions follow [Semantic Versioning](https://semver.org/): MAJOR for
 redesigns, MINOR for new features, PATCH for fixes and content updates.
 
+## [2.0.3] - 2026-09-15
+
+### Fixed
+- The eight food pages written as Markdown (`.md`) were missed by the
+  v2.0.2 image audit and still had broken 1024px Wikimedia links —
+  Brussels sprouts, broccoli, cabbages, Swiss chard, beet greens
+  (image removed: dead hotlink), eggs, and lard. The audit tooling now
+  scans `*.md` as well as `*.html`.
+
 ## [2.0.2] - 2026-09-14
 
 ### Fixed
