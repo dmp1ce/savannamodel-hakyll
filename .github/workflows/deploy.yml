@@ -76,6 +76,9 @@ jobs:
       - name: Generate site
         run: stack exec -- site build
 
+      - name: Check links (internal and external)
+        run: stack exec -- site check
+
       - name: Setup SSH for deploy
         env:
           DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}

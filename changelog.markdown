@@ -8,6 +8,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 and versions follow [Semantic Versioning](https://semver.org/): MAJOR for
 redesigns, MINOR for new features, PATCH for fixes and content updates.
 
+## [2.0.2] - 2026-09-14
+
+### Fixed
+- Food page images: Wikimedia Commons now only serves standardized
+  thumbnail sizes (500/960/1280/1920px), so all `1024px-` hotlinks
+  returned errors. 60 image URLs were rewritten to a working size.
+- Removed 32 images whose non-Wikimedia hotlinks are dead (removed blogs,
+  403s, dead CDNs). Those pages render without an image until proper
+  replacements are found (a Phase 2 goal).
+- CI now runs `site check` (Hakyll's internal + external link validator)
+  after every build, so dead image links can never deploy silently again.
+
 ## [2.0.1] - 2026-09-13
 
 ### Fixed
