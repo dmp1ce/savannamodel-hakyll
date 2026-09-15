@@ -76,8 +76,12 @@ jobs:
       - name: Generate site
         run: stack exec -- site build
 
-      - name: Check links (internal and external)
+      - name: Check internal links (blocking)
+        run: stack exec -- site check --internal-links
+
+      - name: Check all links incl. external (report only)
         run: stack exec -- site check
+        continue-on-error: true
 
       - name: Setup SSH for deploy
         env:

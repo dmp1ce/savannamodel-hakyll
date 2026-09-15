@@ -19,6 +19,9 @@ redesigns, MINOR for new features, PATCH for fixes and content updates.
   replacements are found (a Phase 2 goal).
 - CI now runs `site check` (Hakyll's internal + external link validator)
   after every build, so dead image links can never deploy silently again.
+  Internal links are blocking; external checks are report-only since
+  Wikimedia rate-limits datacenter IPs.
+- Removed 6 dead image attribution links (image_source) to 404/403 pages.
 
 ## [2.0.1] - 2026-09-13
 
