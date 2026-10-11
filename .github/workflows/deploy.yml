@@ -73,6 +73,9 @@ jobs:
       - name: Build Hakyll site executable
         run: stack build
 
+      - name: Validate quote citations
+        run: stack exec -- quote-check
+
       - name: Generate site
         run: stack exec -- site build
 

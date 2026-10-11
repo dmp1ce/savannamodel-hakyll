@@ -33,3 +33,14 @@ executables:
       - base
       - hakyll
       - filepath
+  quote-check:
+    main: quote-check.hs
+    ghc-options:
+      - -rtsopts
+      - -threaded
+      - -with-rtsopts=-N
+    dependencies:
+      - base
+      - hakyll
+      - directory
+      - filepath

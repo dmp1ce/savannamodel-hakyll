@@ -8,6 +8,22 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 and versions follow [Semantic Versioning](https://semver.org/): MAJOR for
 redesigns, MINOR for new features, PATCH for fixes and content updates.
 
+## [2.0.5] - 2026-10-11
+
+### Fixed
+- Three quote citations pointed at the wrong page: the two Stage 3 meat
+  group restrictions ("per session"/"per day") cited p. 97 (the Stage 2
+  nuts group) instead of p. 102, and the children-and-meat quote cited
+  p. 106 instead of p. 105 where the passage starts. All 308 quotes
+  re-verified; the remaining "off-by-one" flags are span quotes that
+  correctly cite their start page.
+
+### Added
+- New `quote-check` executable: validates every quote file using the
+  site's own Hakyll metadata parsing (known book, numeric page,
+  non-empty body). Runs in CI before the site build, so a malformed
+  quote can never deploy silently.
+
 ## [2.0.4] - 2026-09-15
 
 ### Fixed
