@@ -8,6 +8,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 and versions follow [Semantic Versioning](https://semver.org/): MAJOR for
 redesigns, MINOR for new features, PATCH for fixes and content updates.
 
+## [2.0.11] - 2026-10-11
+
+### Added
+- Site search (new "Search" nav item): a client-side full-text
+  search over all 507 food pages and the other site pages, powered
+  by [Pagefind](https://pagefind.app/). The search index is built
+  in CI and shipped with the site — search runs entirely in the
+  browser with no external calls. This is the site's first
+  JavaScript, loaded only on the search page.
+
 ## [2.0.10] - 2026-10-11
 
 ### Added

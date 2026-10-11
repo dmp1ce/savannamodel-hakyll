@@ -23,5 +23,8 @@
   "homepage": "https://github.com/dmp1ce/savannamodel-hakyll#readme",
   "dependencies": {
     "fomantic-ui": "^2.9.4"
+  },
+  "devDependencies": {
+    "pagefind": "^1.5.2"
   }
 }

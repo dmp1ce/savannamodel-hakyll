@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en"$if(page-search)$ data-pagefind-ignore$endif$>
     <head>
         <meta charset="utf-8">
         <meta http-equiv="x-ua-compatible" content="ie=edge">
@@ -40,9 +40,10 @@
     <body>
         <header class="ui segment">
             <div class="ui container">
-            <div class="ui three item borderless menu">
+            <div class="ui four item borderless menu">
                 <a class="$if(page-home)$active $endif$item" href="/">Savanna Model</a>
                 <a class="$if(page-foods)$active $endif$item" href="/foods.html">Foods</a>
+                <a class="$if(page-search)$active $endif$item" href="/search.html">Search</a>
                 <a class="$if(page-about)$active $endif$item" href="/about.html">About</a>
             </div>
             </div>

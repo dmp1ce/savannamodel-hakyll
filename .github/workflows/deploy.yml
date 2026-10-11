@@ -79,6 +79,9 @@ jobs:
       - name: Generate site
         run: stack exec -- site build
 
+      - name: Build search index (Pagefind)
+        run: npx pagefind --site _site
+
       - name: Check internal links (blocking)
         run: stack exec -- site check --internal-links
 

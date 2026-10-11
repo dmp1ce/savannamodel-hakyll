@@ -121,6 +121,19 @@ main = hakyll $ do
                 >>= loadAndApplyTemplate "templates/default.html" indexCtx
                 >>= relativizeUrls
 
+    match "search.html" $ do
+        route idRoute
+        compile $ do
+            let searchCtx =
+                    constField "page-search" "" <>
+                    siteVersion <>
+                    defaultContext
+
+            getResourceBody
+                >>= applyAsTemplate searchCtx
+                >>= loadAndApplyTemplate "templates/default.html" searchCtx
+                >>= relativizeUrls
+
     match "templates/*" $ compile templateBodyCompiler
     match "foods/**/metadata" $ compile templateCompiler
     match "quotes/*" $ compile getResourceBody
