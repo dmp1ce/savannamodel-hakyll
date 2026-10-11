@@ -8,6 +8,22 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 and versions follow [Semantic Versioning](https://semver.org/): MAJOR for
 redesigns, MINOR for new features, PATCH for fixes and content updates.
 
+## [2.0.10] - 2026-10-11
+
+### Added
+- Site favicon: a traffic-light icon (green/amber/red — the food-tier
+  motif) in SVG, ICO, PNG, and apple-touch-icon form.
+
+### Changed
+- `chocolate "drinks"` food page renamed to `chocolate drinks`,
+  matching the book's wording.
+
+### Fixed
+- Manually reviewed the 6 quotes flagged by the page verifier — all
+  are correctly cited (page-span quotations are cited at their start
+  page, and the "duplicate" sentences genuinely appear on p. 102's
+  Stage 3 tables). No citations changed.
+
 ## [2.0.9] - 2026-10-11
 
 ### Added

@@ -32,6 +32,11 @@ main = hakyll $ do
       route $ customRoute (takeFileName . toFilePath)
       compile copyFileCompiler
 
+    -- Favicon and app icons served from `/`
+    match "icons/*" $ do
+      route $ customRoute (takeFileName . toFilePath)
+      compile copyFileCompiler
+
     match "about.markdown" $ pageRules "page-about"
     match "changelog.markdown" $ pageRules "page-changelog"
 
