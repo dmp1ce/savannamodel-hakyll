@@ -8,6 +8,22 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 and versions follow [Semantic Versioning](https://semver.org/): MAJOR for
 redesigns, MINOR for new features, PATCH for fixes and content updates.
 
+## [2.0.9] - 2026-10-11
+
+### Added
+- 29 new food pages from a systematic audit of the *Paleo in a
+  Nutshell* food-group tables against the food database. Highlights:
+  asparagus, French fries, pretzels, Cheerios, Rice Krispies, Shredded
+  Wheat, Weetabix, Tabasco, lentils (green and red), bologna,
+  bratwurst, sardine oil, sesame oil, tallow, rice milk, erythritol,
+  polyols, Demerara sugar, vetch, and chia/flax/hempseed butters and
+  flours. Four new categories: Seed Products (Green-Green), Starchy
+  Vegetables (Green-Yellow), Sugar Replacements (Green), and Animal
+  Fats (Yellow-Red).
+- `/data/foods.json` now falls back to the filename for foods without
+  a title (matching how the site renders them) instead of shipping an
+  empty name.
+
 ## [2.0.8] - 2026-10-11
 
 ### Added

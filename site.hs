@@ -281,7 +281,8 @@ buildFoodsJson = do
     mtitle <- getMetadataField (itemIdentifier f) "title"
     mtag <- getMetadataField (itemIdentifier f) "foodtag"
     mroute <- getRoute (itemIdentifier f)
-    let title = fromMaybe "" mtitle
+    let routed = fromMaybe "/" mroute
+        title = fromMaybe (dropExtension . takeFileName $ routed) mtitle
     let (tier, sortKey) = case cats of
           (t:_) -> (t, (fromMaybe 100 (lookup t tierSorts), cats, title))
           []    -> ("", (100, [], title))
