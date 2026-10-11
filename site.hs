@@ -3,8 +3,11 @@ module Main where
 
 --------------------------------------------------------------------------------
 import           Control.Monad (filterM, forM, when)
-import           Data.Aeson (FromJSON, decode)
+import           Data.Aeson (FromJSON, decode, encode, object, (.=))
 import qualified Data.ByteString.Lazy as BSL
+import qualified Data.ByteString as BS
+import qualified Data.Text as T
+import qualified Data.Text.Encoding as TE
 import           Data.List (sortOn, intercalate, uncons)
 import qualified Data.Map as Map
 import           Data.Maybe (fromMaybe, maybeToList)
@@ -92,6 +95,14 @@ main = hakyll $ do
             >>= loadAndApplyTemplate "templates/default.html" sourcesCtx
             >>= relativizeUrls
 
+    create ["data/foods.json"] $ do
+        route   idRoute
+        compile (buildFoodsJson >>= makeItem)
+
+    create ["data/quotes.json"] $ do
+        route   idRoute
+        compile (buildQuotesJson >>= makeItem)
+
     match "index.html" $ do
         route idRoute
         compile $ do
@@ -176,13 +187,16 @@ chapterFor book page = do
 
 -- | Quote fields used wherever a quote is rendered: $chapter$ (from
 -- the chapter map) and $anchor$ (stable id for /sources.html links).
+-- | Stable id for /sources.html links.
+anchorOf :: Item a -> String
+anchorOf = dropExtension . takeFileName . toFilePath . itemIdentifier
+
 quoteContext :: Context String
 quoteContext =
     defaultContext <>
     field "chapter" resolveChapter <>
     field "anchor" (return . anchorOf)
   where
-    anchorOf = dropExtension . takeFileName . toFilePath . itemIdentifier
     resolveChapter item = do
       book <- fromMaybe "" <$> getMetadataField (itemIdentifier item) "book"
       page <- getMetadataField (itemIdentifier item) "page"
@@ -248,6 +262,63 @@ buildQuoteItem foodsByTag q = do
   foodItems <- mapM (loadAndApplyTemplate "templates/sources-food.html" defaultContext) fs
   let ctx = quoteContext <> listField "related-foods" defaultContext (return foodItems)
   loadAndApplyTemplate "templates/sources-quote.html" ctx q
+
+
+--------------------------------------------------------------------------------
+-- JSON data feeds (/data/foods.json, /data/quotes.json)
+
+-- | One entry per food page: name, tier, full category path, URL,
+-- and the foodtag used to match quotes.
+buildFoodsJson :: Compiler String
+buildFoodsJson = do
+  foods <- loadAll (complement "foods/**/metadata" .&&. "foods/**") :: Compiler [Item String]
+  tierMeta <- getAllMetadata "foods/*/metadata"
+  let tierSorts = [ (last (splitDirectories (takeDirectory (toFilePath i)))
+                    , fromMaybe 100 (sortMetadata m))
+                  | (i, m) <- tierMeta ]
+  rows <- forM foods $ \f -> do
+    cats <- getCategory' (itemIdentifier f)
+    mtitle <- getMetadataField (itemIdentifier f) "title"
+    mtag <- getMetadataField (itemIdentifier f) "foodtag"
+    mroute <- getRoute (itemIdentifier f)
+    let title = fromMaybe "" mtitle
+    let (tier, sortKey) = case cats of
+          (t:_) -> (t, (fromMaybe 100 (lookup t tierSorts), cats, title))
+          []    -> ("", (100, [], title))
+    return (sortKey, object
+      [ "name" .= title
+      , "tier" .= tier
+      , "category" .= cats
+      , "url" .= maybe "/" ("/" ++) mroute
+      , "foodtag" .= mtag
+      ])
+  return (T.unpack (TE.decodeUtf8 (BS.toStrict (encode (map snd (sortOn fst rows))))))
+
+-- | One entry per quote: book, chapter, page, tags, body, and a
+-- stable link into the source browser.
+buildQuotesJson :: Compiler String
+buildQuotesJson = do
+  quotes <- sortQuotes =<< loadAll "quotes/*" :: Compiler [Item String]
+  rows <- forM quotes $ \q -> do
+      let ident = toFilePath (itemIdentifier q)
+      book <- fromMaybe "" <$> getMetadataField (itemIdentifier q) "book"
+      mpage <- getMetadataField (itemIdentifier q) "page"
+      tags <- getTags (itemIdentifier q)
+      page <- maybe (fail (ident ++ ": invalid 'page' field"))
+                    return (readMaybe =<< mpage) :: Compiler Int
+      mchapter <- unsafeCompiler (chapterFor book page)
+      chapterTitle <- maybe (fail (ident ++ ": no chapter for page " ++ show page)) return mchapter
+      let anchor = anchorOf q
+      return $ object
+        [ "book" .= book
+        , "page" .= page
+        , "chapter" .= chapterTitle
+        , "tags" .= tags
+        , "anchor" .= anchor
+        , "url" .= ("/sources.html#" ++ anchor)
+        , "body" .= itemBody q
+        ]
+  return (T.unpack (TE.decodeUtf8 (BS.toStrict (encode rows))))
 
 pageRules :: String -> Rules ()
 pageRules pageLabel = do

@@ -37,6 +37,7 @@ executables:
       - aeson
       - bytestring
       - containers
+      - text
   quote-check:
     main: quote-check.hs
     ghc-options:

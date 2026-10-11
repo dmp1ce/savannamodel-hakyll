@@ -8,6 +8,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 and versions follow [Semantic Versioning](https://semver.org/): MAJOR for
 redesigns, MINOR for new features, PATCH for fixes and content updates.
 
+## [2.0.8] - 2026-10-11
+
+### Added
+- Machine-readable data feeds for a future native app: `/data/foods.json`
+  (name, tier, category path, URL, foodtag for every food) and
+  `/data/quotes.json` (book, chapter, page, tags, body, and a stable
+  link into the Sources page for every quote).
+
 ## [2.0.7] - 2026-10-11
 
 ### Changed
