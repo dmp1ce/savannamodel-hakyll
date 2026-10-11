@@ -1,11 +1,16 @@
+{-# LANGUAGE DeriveGeneric #-}
 module Main where
 
 --------------------------------------------------------------------------------
-import           Data.Maybe (fromMaybe)
+import           Control.Monad (filterM, forM, when)
+import           Data.Aeson (FromJSON, decode)
+import qualified Data.ByteString.Lazy as BSL
 import           Data.List (sortOn, intercalate, uncons)
+import qualified Data.Map as Map
+import           Data.Maybe (fromMaybe, maybeToList)
+import           GHC.Generics (Generic)
+import           System.FilePath (dropExtension, takeDirectory, takeFileName, splitDirectories, joinPath)
 import           Text.Read (readMaybe)
-import           System.FilePath (takeDirectory, takeFileName, splitDirectories, joinPath)
-import           Control.Monad (filterM)
 import           Hakyll
 
 --------------------------------------------------------------------------------
@@ -50,9 +55,9 @@ main = hakyll $ do
                 constField "food-categories" (intercalate ", " cats) <>
                 (constField "color-section" . itemBody) colorItem <>
                 (if null quotes then mempty
-                   else listField "quotes" defaultContext (sortQuotes quotes)) <>
+                   else listField "quotes" quoteContext (sortQuotes quotes)) <>
                 (if null colorQuotes then mempty
-                   else listField "color-quotes" defaultContext (sortQuotes colorQuotes))
+                   else listField "color-quotes" quoteContext (sortQuotes colorQuotes))
 
         pandocCompiler
           >>= loadAndApplyTemplate "templates/food.html"    foodCtx
@@ -71,6 +76,20 @@ main = hakyll $ do
           getResourceBody
             >>= applyAsTemplate foodsCtx
             >>= loadAndApplyTemplate "templates/default.html" foodsCtx
+            >>= relativizeUrls
+
+    match "sources.html" $ do
+        route idRoute
+        compile $ do
+          let sourcesCtx =
+                  constField "page-sources" "" <>
+                  siteVersion <>
+                  listField "source-books" defaultContext buildSourceBooks <>
+                  defaultContext
+
+          getResourceBody
+            >>= applyAsTemplate sourcesCtx
+            >>= loadAndApplyTemplate "templates/default.html" sourcesCtx
             >>= relativizeUrls
 
     match "index.html" $ do
@@ -121,9 +140,114 @@ instance Ord QuoteMetadata where
 filterQuotes :: MonadMetadata m => String -> [Item a] -> m [Item a]
 filterQuotes foodtag ids =
   let f :: MonadMetadata m => String -> Item a -> m Bool
-      f fn (Item i _) = do tags <- getTags i
-                           return $ elem fn tags
+      f fn (Item i _) = do
+        tags <- getTags i
+        return $ elem fn tags
   in filterM (f foodtag) ids
+
+
+--------------------------------------------------------------------------------
+-- Chapter map from sources/chapters.json
+
+data Chapter = Chapter
+  { chapter  :: String
+  , start    :: Int
+  } deriving (Generic, Show)
+
+instance FromJSON Chapter
+
+loadChapters :: IO (Maybe (Map.Map String [Chapter]))
+loadChapters = decode <$> BSL.readFile "sources/chapters.json"
+
+-- | Resolve the chapter title a printed page belongs to, or Nothing if
+-- the page falls outside every chapter.
+chapterFor :: String -> Int -> IO (Maybe String)
+chapterFor book page = do
+  mchapters <- loadChapters
+  return $ do
+    chapters <- Map.lookup book =<< mchapters
+    case [c | c <- chapters, start c <= page] of
+      []  -> Nothing
+      cs  -> Just (chapter (last cs))
+
+
+--------------------------------------------------------------------------------
+-- Quote rendering
+
+-- | Quote fields used wherever a quote is rendered: $chapter$ (from
+-- the chapter map) and $anchor$ (stable id for /sources.html links).
+quoteContext :: Context String
+quoteContext =
+    defaultContext <>
+    field "chapter" resolveChapter <>
+    field "anchor" (return . anchorOf)
+  where
+    anchorOf = dropExtension . takeFileName . toFilePath . itemIdentifier
+    resolveChapter item = do
+      book <- fromMaybe "" <$> getMetadataField (itemIdentifier item) "book"
+      page <- getMetadataField (itemIdentifier item) "page"
+      let ident = toFilePath (itemIdentifier item)
+      case readMaybe =<< page of
+        Just p -> do
+          mchapter <- unsafeCompiler (chapterFor book p)
+          maybe (fail (ident ++ ": no chapter for page " ++ show p)) return mchapter
+        Nothing -> fail (ident ++ ": invalid 'page' field")
+
+
+--------------------------------------------------------------------------------
+-- Source browser (/sources.html)
+
+sourceBookOrder :: [String]
+sourceBookOrder = ["Paleo in a Nutshell", "Deadly Harvest"]
+
+-- | Build one rendered section per book, each containing its chapters
+-- and their quotes, each quote with back-links to its food pages.
+buildSourceBooks :: Compiler [Item String]
+buildSourceBooks = do
+  foods <- loadAll (complement "foods/**/metadata" .&&. "foods/**")
+  foodsByTag <- concat <$> mapM (\f -> do
+      mtag <- getMetadataField (itemIdentifier f) "foodtag"
+      return [(t, f) | t <- maybeToList mtag]) foods
+  quotes <- sortQuotes =<< loadAll "quotes/*"
+  quoteTriples <- forM quotes $ \q -> do
+      book <- getMetadataField (itemIdentifier q) "book"
+      page <- getMetadataField (itemIdentifier q) "page"
+      return (book, readMaybe =<< page, q)
+  mchapters <- unsafeCompiler loadChapters
+  chaptersMap <- maybe (fail "sources/chapters.json missing or invalid") return mchapters
+  forM sourceBookOrder $ \book -> do
+    let chapters = Map.findWithDefault [] book chaptersMap
+        chapterRanges = zip chapters (drop 1 (map start chapters) ++ [maxBound])
+        bookQuotes = [(p, q) | (Just b, Just p, q) <- quoteTriples, b == book]
+        chapterQuoteLists = [ [q | (p, q) <- bookQuotes, start c <= p, p < next]
+                           | (c, next) <- chapterRanges ]
+    when (sum (map length chapterQuoteLists) /= length bookQuotes) $
+      fail (book ++ ": some quotes fall outside every chapter")
+    let chapterGroups = [ (chapter c, qs)
+                        | ((c, _), qs) <- zip chapterRanges chapterQuoteLists
+                        , not (null qs) ]
+    chapterItems <- forM chapterGroups $ \(cname, qs) -> do
+      quoteItems <- mapM (buildQuoteItem foodsByTag) qs
+      let ctx = constField "chapter" cname
+                <> listField "chapter-quotes" defaultContext (return quoteItems)
+                <> defaultContext
+      makeItem "" >>= loadAndApplyTemplate "templates/sources-chapter.html" ctx
+    let ctx = constField "book" book
+              <> listField "source-chapters" defaultContext (return chapterItems)
+              <> defaultContext
+    makeItem "" >>= loadAndApplyTemplate "templates/sources-book.html" ctx
+
+-- | Render one quote for the source browser: the passage, its
+-- citation, and back-links to the food pages tagged with it.  The
+-- template is applied to the quote item itself so metadata fields
+-- ($book$, $page$) resolve against the quote.
+buildQuoteItem :: [(String, Item String)] -> Item String -> Compiler (Item String)
+buildQuoteItem foodsByTag q = do
+  tags <- getTags (itemIdentifier q)
+  let fs = [f | t <- tags, (t2, f) <- foodsByTag, t == t2]
+  foodItems <- mapM (loadAndApplyTemplate "templates/sources-food.html" defaultContext) fs
+  let ctx = quoteContext <> listField "related-foods" defaultContext (return foodItems)
+  loadAndApplyTemplate "templates/sources-quote.html" ctx q
 
 pageRules :: String -> Rules ()
 pageRules pageLabel = do

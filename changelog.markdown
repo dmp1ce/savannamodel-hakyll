@@ -8,6 +8,25 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 and versions follow [Semantic Versioning](https://semver.org/): MAJOR for
 redesigns, MINOR for new features, PATCH for fixes and content updates.
 
+## [2.0.6] - 2026-10-11
+
+### Added
+- New **Sources** page: every one of the 309 quotes from Geoff Bond's
+  books, browsable by book and chapter, each entry linking back to the
+  food pages it appears on.
+- Quotes on food pages are now collapsible: the citation line (book,
+  chapter, page) expands to reveal the full passage, and links to the
+  quote's entry on the Sources page.
+- Citations now include the chapter, from a new book/chapter map
+  (`sources/chapters.json`) that `quote-check` also validates against.
+
+### Fixed
+- Two quote files slipped through validation: `dh-63-reptile-food` had a
+  typo'd `.thml` extension, and `dh-93-cretan-breakfast` was misnamed —
+  it is actually from *Paleo in a Nutshell* p. 123 (now
+  `pian-123-cretan-breakfast`). `quote-check` now also fails if it
+  finds any non-`.html` file in `quotes/`.
+
 ## [2.0.5] - 2026-10-11
 
 ### Fixed

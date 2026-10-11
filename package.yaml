@@ -13,6 +13,7 @@ github: dmp1ce/savannamodel
 
 default-extensions:
   - OverloadedStrings
+  - DeriveGeneric
 
 ghc-options:
   - -O2
@@ -33,6 +34,9 @@ executables:
       - base
       - hakyll
       - filepath
+      - aeson
+      - bytestring
+      - containers
   quote-check:
     main: quote-check.hs
     ghc-options:
@@ -44,3 +48,6 @@ executables:
       - hakyll
       - directory
       - filepath
+      - aeson
+      - bytestring
+      - containers

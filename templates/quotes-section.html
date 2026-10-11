@@ -1,9 +1,10 @@
-$if(quotes)$<p>
-    <h2>Additional Quotes</h2>
-    <p>Specific references to <b>$title$</b> throughout Geoff Bond's publications.</p>
-    $for(quotes)$
-    <p>
-        $body$ ~<a href="/about.html">$book$</a> p.$page$
-    </p>
-    $endfor$
-</p>$endif$
+$if(quotes)$
+<h2>Additional Quotes</h2>
+<p>Specific references to <b>$title$</b> throughout Geoff Bond's publications.</p>
+$for(quotes)$
+<details class="quote">
+    <summary class="quote-citation"><a href="/sources.html#$anchor$">$book$ — $chapter$, p. $page$</a></summary>
+    <p>$body$</p>
+</details>
+$endfor$
+$endif$

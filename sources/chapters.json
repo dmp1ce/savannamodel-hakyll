@@ -1,0 +1,31 @@
+{
+  "Deadly Harvest": [
+    {"chapter": "Introduction", "start": 1},
+    {"chapter": "1. What is Nutritional Anthropology?", "start": 5},
+    {"chapter": "2. The Farming Revolution and Its Consequences", "start": 25},
+    {"chapter": "3. How We Eat and Its Consequences", "start": 51},
+    {"chapter": "4. The Science I: Population Studies and Biochemical Clues", "start": 85},
+    {"chapter": "5. The Science II: Digestive System and Dietary Clues", "start": 113},
+    {"chapter": "6. The Owner's Manual", "start": 137},
+    {"chapter": "7. Eating the \"Savanna Model\" Way", "start": 161},
+    {"chapter": "8. The Savanna Model Lifestyle", "start": 189},
+    {"chapter": "9. Disease and the Bond Effect", "start": 229},
+    {"chapter": "Conclusion", "start": 275},
+    {"chapter": "Resources", "start": 279},
+    {"chapter": "References", "start": 283}
+  ],
+  "Paleo in a Nutshell": [
+    {"chapter": "Introduction", "start": 1},
+    {"chapter": "1. Origin and Main Features", "start": 9},
+    {"chapter": "2. Living the Way Nature Intended", "start": 26},
+    {"chapter": "3. How Did It Go Wrong?", "start": 34},
+    {"chapter": "4. The Owner's Manual", "start": 53},
+    {"chapter": "5. Adopting the Paleo Feeding Pattern", "start": 86},
+    {"chapter": "Conclusion", "start": 113},
+    {"chapter": "Appendix A. Population Studies Supporting the Paleo Lifestyle", "start": 117},
+    {"chapter": "Appendix B. Paleo-Conforming Recipes", "start": 127},
+    {"chapter": "Resources", "start": 146},
+    {"chapter": "References", "start": 150},
+    {"chapter": "About the Author", "start": 162}
+  ]
+}
