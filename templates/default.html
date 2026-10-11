@@ -20,25 +20,25 @@
             details.quote[open] > summary.quote-citation {
                 margin-bottom: 0.5em;
             }
+            .quote-entry {
+                padding: 0.15em 0.5em;
+                border-bottom: 1px solid rgba(34,36,38,.05);
+            }
             .quote-entry .quote-citation {
                 color: rgba(0,0,0,.6);
                 font-style: italic;
             }
-            .quote-foods {
-                margin-top: 0.5em;
-            }
-            .quote-foods .ui.label {
-                margin-right: 0.3em;
+            .quote-entry .quote-foods .ui.label {
+                margin-left: 0.3em;
             }
         </style>
     </head>
     <body>
         <header class="ui segment">
             <div class="ui container">
-            <div class="ui four item borderless menu">
+            <div class="ui three item borderless menu">
                 <a class="$if(page-home)$active $endif$item" href="/">Savanna Model</a>
                 <a class="$if(page-foods)$active $endif$item" href="/foods.html">Foods</a>
-                <a class="$if(page-sources)$active $endif$item" href="/sources.html">Sources</a>
                 <a class="$if(page-about)$active $endif$item" href="/about.html">About</a>
             </div>
             </div>
@@ -50,7 +50,8 @@
 
         <footer class="ui segment">
             <div class="ui text center aligned container">
-            <p>Savanna Model v$site-version$ — see the <a href="/changelog.html">changelog</a> for what changed.</p>
+            <p>Savanna Model v$site-version$ — see the <a href="/changelog.html">changelog</a> for what changed;
+            quote <a href="/sources.html">sources</a>.</p>
             <p>Site proudly generated with
             <a href="http://jaspervdj.be/hakyll">Hakyll</a>
             and using <a href="https://fomantic-ui.com/">Fomantic UI</a>.</p>

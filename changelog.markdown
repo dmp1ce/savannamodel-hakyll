@@ -8,6 +8,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 and versions follow [Semantic Versioning](https://semver.org/): MAJOR for
 redesigns, MINOR for new features, PATCH for fixes and content updates.
 
+## [2.0.7] - 2026-10-11
+
+### Changed
+- The Sources page is now a compact index: one line per quote (page
+  number + food links) instead of the full passages, which are already
+  shown on the food pages. Removed from the nav menu; reachable via a
+  footer link and the per-quote citations.
+
 ## [2.0.6] - 2026-10-11
 
 ### Added

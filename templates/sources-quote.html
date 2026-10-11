@@ -1,9 +1,6 @@
-<div class="ui segment quote-entry" id="$anchor$">
-    <p>$body$</p>
-    <p class="quote-citation">$book$ — $chapter$, p. $page$</p>
-    $if(related-foods)$
-    <div class="quote-foods">
+<div class="quote-entry" id="$anchor$">
+    <span class="quote-citation">p. $page$</span>
+    <span class="quote-foods">
         $for(related-foods)$$body$$endfor$
-    </div>
-    $endif$
+    </span>
 </div>
