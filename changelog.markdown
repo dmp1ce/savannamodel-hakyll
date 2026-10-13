@@ -8,6 +8,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 and versions follow [Semantic Versioning](https://semver.org/): MAJOR for
 redesigns, MINOR for new features, PATCH for fixes and content updates.
 
+## [2.0.12] - 2026-10-13
+
+### Added
+- FAQ page (new "FAQ" nav item): 32 reader questions answered by Geoff
+  Bond in *The Bond Briefing* Q&A column, curated from the 1999–2025
+  archive and grouped into 9 categories (Salt & Electrolytes, Water &
+  Hydration, Protein & Meat, Supplements & Vitamins, Fats & Oils,
+  Sugar & Sweeteners, Grains & Breads, Dairy, Fruits & Vegetables).
+  Every answer is verbatim with an issue citation and is searchable
+  via the site search. Published with Geoff Bond's permission.
+
 ## [2.0.11] - 2026-10-11
 
 ### Added

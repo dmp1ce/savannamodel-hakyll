@@ -134,10 +134,27 @@ main = hakyll $ do
                 >>= loadAndApplyTemplate "templates/default.html" searchCtx
                 >>= relativizeUrls
 
+    match "faq.html" $ do
+        route idRoute
+        compile $ do
+            faqItems <- loadAll "faq/*"
+            categories <- buildFaqCategories faqItems
+            let faqCtx =
+                    constField "page-faq" "" <>
+                    siteVersion <>
+                    listField "faq-categories" defaultContext (return categories) <>
+                    defaultContext
+
+            getResourceBody
+                >>= applyAsTemplate faqCtx
+                >>= loadAndApplyTemplate "templates/default.html" faqCtx
+                >>= relativizeUrls
+
     match "templates/*" $ compile templateBodyCompiler
     match "foods/**/metadata" $ compile templateCompiler
     match "quotes/*" $ compile getResourceBody
     match "colors/sections/**" $ compile getResourceBody
+    match "faq/*" $ compile getResourceBody
 
 -- | Obtain categories from a page. Modified from Hakyll function with the same name.
 getCategory' :: MonadMetadata m => Identifier -> m [String]
@@ -281,6 +298,47 @@ buildQuoteItem foodsByTag q = do
   let ctx = quoteContext <> listField "related-foods" defaultContext (return foodItems)
   loadAndApplyTemplate "templates/sources-quote.html" ctx q
 
+
+--------------------------------------------------------------------------------
+-- FAQ (/faq.html): one category section per newsletter Q&A topic
+
+-- | Category slug -> display name, in display order.
+faqCategories :: [(String, String)]
+faqCategories =
+    [ ("salt",        "Salt & Electrolytes")
+    , ("water",       "Water & Hydration")
+    , ("protein",     "Protein & Meat")
+    , ("supplements", "Supplements & Vitamins")
+    , ("fats",        "Fats & Oils")
+    , ("sugar",       "Sugar & Sweeteners")
+    , ("grains",      "Grains & Breads")
+    , ("dairy",       "Dairy")
+    , ("produce",     "Fruits & Vegetables")
+    ]
+
+faqEntryContext :: Context String
+faqEntryContext =
+    metaField "question" <>
+    metaField "source" <>
+    field "slug" (return . dropExtension . takeFileName . toFilePath . itemIdentifier) <>
+    bodyField "body"
+  where
+    metaField k = field k (\i -> fromMaybe "" <$> getMetadataField (itemIdentifier i) k)
+
+buildFaqCategories :: [Item String] -> Compiler [Item String]
+buildFaqCategories faqs = do
+  let faqPath i = dropExtension . takeFileName . toFilePath $ itemIdentifier i
+  faqsBySlug <- Map.fromListWith (++) <$>
+      mapM (\i -> do
+              cat <- getMetadataField (itemIdentifier i) "category"
+              return (fromMaybe "" cat, [i])) faqs
+  forM faqCategories $ \(slug, name) -> do
+    let entries = sortOn faqPath (Map.findWithDefault [] slug faqsBySlug)
+    let ctx = constField "faq-category-slug" slug
+              <> constField "faq-category-name" name
+              <> listField "faq-entries" faqEntryContext (return entries)
+              <> defaultContext
+    makeItem "" >>= loadAndApplyTemplate "templates/faq-category.html" ctx
 
 --------------------------------------------------------------------------------
 -- JSON data feeds (/data/foods.json, /data/quotes.json)
