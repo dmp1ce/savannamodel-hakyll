@@ -9,6 +9,25 @@ title: FAQ
     Here is a selection of his answers, grouped by topic. Each answer
     cites the issue it appeared in.</p>
 
+    <noscript>
+        <p class="faq-citation">To ask the AI assistant, please enable
+        JavaScript — or browse the questions below.</p>
+    </noscript>
+    <form id="ask-form" class="ui form" hidden>
+        <div class="ui action input">
+            <input type="text" id="ask-input" placeholder="Ask a question about the Savanna Model…"
+                   aria-label="Ask a question about the Savanna Model" maxlength="500">
+            <button class="ui primary button" type="submit" id="ask-button">Ask</button>
+        </div>
+    </form>
+    <div id="ask-result" class="ui segment" hidden>
+        <div id="ask-answer"></div>
+        <div id="ask-sources" class="faq-citation"></div>
+    </div>
+    <p class="faq-citation">The AI assistant answers only from Geoff
+    Bond's books and newsletters, with citations. It is not medical
+    advice — always consult your doctor.</p>
+
     <div class="ui secondary pointing menu">
         <a class="item" href="#salt">Salt &amp; Electrolytes</a>
         <a class="item" href="#water">Water &amp; Hydration</a>
@@ -25,3 +44,49 @@ $for(faq-categories)$
 $body$
 $endfor$
 </div>
+
+<script>
+(function () {
+    var form = document.getElementById("ask-form");
+    if (!form) return;
+    form.hidden = false;
+    var input = document.getElementById("ask-input");
+    var button = document.getElementById("ask-button");
+    var result = document.getElementById("ask-result");
+    var answerBox = document.getElementById("ask-answer");
+    var sourcesBox = document.getElementById("ask-sources");
+    var CHAT_URL = "https://ask.savannamodel.info/ask";
+
+    form.addEventListener("submit", function (event) {
+        event.preventDefault();
+        var question = input.value.trim();
+        if (question.length < 3) return;
+        button.disabled = true;
+        button.textContent = "Asking…";
+        result.hidden = false;
+        answerBox.textContent = "Thinking…";
+        sourcesBox.textContent = "";
+        fetch(CHAT_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ question: question })
+        }).then(function (res) {
+            if (!res.ok) throw new Error("HTTP " + res.status);
+            return res.json();
+        }).then(function (data) {
+            answerBox.textContent = data.answer;
+            sourcesBox.textContent = data.sources && data.sources.length
+                ? "Sources: " + data.sources.map(function (s) { return s.citation; }).join(" · ")
+                : "";
+        }).catch(function () {
+            answerBox.textContent =
+                "Sorry — the assistant is unavailable right now. " +
+                "Try browsing the questions below, or the site search.";
+        }).finally(function () {
+            button.disabled = false;
+            button.textContent = "Ask";
+        });
+    });
+})();
+</script>
+

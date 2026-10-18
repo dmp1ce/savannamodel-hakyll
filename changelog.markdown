@@ -8,6 +8,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 and versions follow [Semantic Versioning](https://semver.org/): MAJOR for
 redesigns, MINOR for new features, PATCH for fixes and content updates.
 
+## [2.0.13] - 2026-10-17
+
+### Added
+- "Ask a question" AI assistant on the FAQ page. The assistant answers
+  only from Geoff Bond's books and *The Bond Briefing* (curated quotes
+  and FAQ answers), citing the passage behind every claim. Questions
+  are answered by GLM 5.3 Flash routed through private, encrypted
+  model providers — no advertising, no data mining. Not medical
+  advice, as always.
+
 ## [2.0.12] - 2026-10-13
 
 ### Added
