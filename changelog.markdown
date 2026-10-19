@@ -8,6 +8,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 and versions follow [Semantic Versioning](https://semver.org/): MAJOR for
 redesigns, MINOR for new features, PATCH for fixes and content updates.
 
+## [2.0.14] - 2026-10-19
+
+### Changed
+- Every food page now has an illustration. Added missing images to 50+
+  pages (fish oils, game meats, exotic meats, eggs, nuts, beverages and
+  more) using Wikimedia Commons files, each verified for relevance.
+- Replaced the last 48 externally hotlinked images (blogspot, wordpress,
+  shopify and similar sources that can rot or hotlink-block) with stable
+  Wikimedia Commons equivalents. All 189 image URLs verified live.
+- Quote fixes: 19 food pages gained quotes through 69 high-confidence
+  alias tag mappings (waters→water, salmon-oil→salmon, bok-choy→cabbage,
+  green-onion→onion and more). Remaining 41 gaps documented in a review
+  list for category-mapping decisions.
+
 ## [2.0.13] - 2026-10-17
 
 ### Added
