@@ -20,7 +20,7 @@ import           Data.List (sort)
 import qualified Data.Map as Map
 import           Data.Maybe (isJust)
 import           GHC.Generics (Generic)
-import           Hakyll.Core.Metadata (lookupString)
+import           Hakyll.Core.Metadata (Metadata, lookupString)
 import           Hakyll.Core.Provider.Metadata (parsePage)
 import           System.Directory (listDirectory)
 import           System.Environment (getArgs)
@@ -31,7 +31,7 @@ import           Text.Read (readMaybe)
 
 
 validBooks :: [String]
-validBooks = ["Deadly Harvest", "Paleo in a Nutshell"]
+validBooks = ["Deadly Harvest", "Paleo in a Nutshell", "The Bond Briefing"]
 
 
 
@@ -84,26 +84,48 @@ checkQuote dir file = do
     Left err -> return [file ++ ": does not parse: " ++ show err]
     Right (meta, body) -> do
       let problems = map (\p -> file ++ ": " ++ p)
-                (bookProblems meta ++ pageProblems meta ++ bodyProblems body)
+                (bookProblems meta ++ pageProblems meta
+                 ++ issueProblems meta ++ bodyProblems body)
       chapterProbs <- chapterProblems meta
       return (problems ++ chapterProbs)
   where
+    bookProblems :: Metadata -> [String]
     bookProblems meta = case lookupString "book" meta of
       Nothing -> ["missing 'book' field"]
       Just b
         | b `notElem` validBooks -> ["unknown book '" ++ b ++ "'"]
         | otherwise -> []
+    pageProblems :: Metadata -> [String]
     pageProblems meta = case lookupString "page" meta of
       Nothing -> ["missing 'page' field"]
       Just p -> case readMaybe p :: Maybe Int of
         Just n | n > 0 -> []
         _ -> ["non-numeric or non-positive 'page' field: " ++ show p]
+    issueProblems :: Metadata -> [String]
+    issueProblems meta = case lookupString "book" meta of
+      Just "The Bond Briefing" -> case lookupString "issue" meta of
+        Nothing -> ["missing 'issue' field for The Bond Briefing"]
+        Just iss -> [ "malformed 'issue' field (expected YYYY-MM): " ++ show iss
+                    | not (validIssue iss) ]
+      _ -> []
+      where
+        validIssue s = case s of
+          [y1, y2, y3, y4, '-', m1, m2] ->
+            all (`elem` ("0123456789" :: String)) [y1, y2, y3, y4, m1, m2] && validMonth [m1, m2]
+          _ -> False
+        validMonth ('0' : m) = all (`elem` ("0123456789" :: String)) m
+        validMonth ['1', m] = m <= '2'
+        validMonth _ = False
+    chapterProblems :: Metadata -> IO [String]
     chapterProblems meta =
-      case (lookupString "book" meta, lookupString "page" meta >>= readMaybeInt) of
-        (Just b, Just n) -> do
-          mchapter <- chapterFor b n
-          return ["no chapter covers page " ++ show n ++ " in " ++ b | not (isJust mchapter)]
-        _ -> return []
+      case lookupString "book" meta of
+        Just "The Bond Briefing" -> return []
+        _ ->
+          case (lookupString "book" meta, lookupString "page" meta >>= readMaybeInt) of
+            (Just b, Just n) -> do
+              mchapter <- chapterFor b n
+              return ["no chapter covers page " ++ show n ++ " in " ++ b | not (isJust mchapter)]
+            _ -> return []
     readMaybeInt :: String -> Maybe Int
     readMaybeInt = readMaybe
     bodyProblems :: String -> [String]
