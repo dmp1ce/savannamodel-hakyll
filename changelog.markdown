@@ -8,6 +8,25 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 and versions follow [Semantic Versioning](https://semver.org/): MAJOR for
 redesigns, MINOR for new features, PATCH for fixes and content updates.
 
+## [2.0.15] - 2026-10-20
+
+### Changed
+- All 306 remaining food list pages now render properly with title,
+  quote linkage and an illustration. Every page got front matter (title
+  and foodtag) and a hand-verified Wikimedia Commons image, so no food
+  page is a blank gray box any more.
+- Quote mappings extended to the newly activated foodtags (category
+  umbrellas for fish, shellfish, oils, fruit, meat and seeds, plus
+  coleslaw→cabbage and olive-oil-spread→olive-oil aliases), bringing
+  quotes to 86 more pages.
+- New quote passages: berries (*Natural Eating* p.66) and fish roe
+  omega-3s (*The Bond Briefing* 2019-08 p.4) — the first newsletter
+  quote on the site, with issue metadata in the quote files.
+- The sources page now lists *The Bond Briefing* issues alongside the
+  books.
+- All 499 food page images verified live (HTTP 200) and the full site
+  link-checked: 515 pages, zero broken internal links.
+
 ## [2.0.14] - 2026-10-19
 
 ### Changed

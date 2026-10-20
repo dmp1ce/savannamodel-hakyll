@@ -8,7 +8,7 @@ import qualified Data.ByteString.Lazy as BSL
 import qualified Data.ByteString as BS
 import qualified Data.Text as T
 import qualified Data.Text.Encoding as TE
-import           Data.List (sortOn, intercalate, uncons)
+import           Data.List (sortOn, intercalate, uncons, groupBy)
 import qualified Data.Map as Map
 import           Data.Maybe (fromMaybe, maybeToList)
 import           GHC.Generics (Generic)
@@ -180,6 +180,8 @@ data QuoteMetadata = QuoteMetadata (Maybe String) (Maybe Int) (Maybe Int) derivi
 instance Ord QuoteMetadata where
   (<=) (QuoteMetadata (Just "Paleo in a Nutshell") _ _) (QuoteMetadata (Just "Deadly Harvest") _ _) = True
   (<=) (QuoteMetadata (Just "Deadly Harvest") _ _) (QuoteMetadata (Just "Paleo in a Nutshell") _ _) = False
+  (<=) (QuoteMetadata (Just "The Bond Briefing") _ _) _ = True
+  (<=) _ (QuoteMetadata (Just "The Bond Briefing") _ _) = False
   (<=) (QuoteMetadata _ i o) (QuoteMetadata _ i' o') = if i == i' then o <= o' else i <= i'
 
 -- | Return only quotes which are tagged with food name
@@ -233,21 +235,25 @@ quoteContext =
     field "anchor" (return . anchorOf)
   where
     resolveChapter item = do
-      book <- fromMaybe "" <$> getMetadataField (itemIdentifier item) "book"
-      page <- getMetadataField (itemIdentifier item) "page"
-      let ident = toFilePath (itemIdentifier item)
-      case readMaybe =<< page of
-        Just p -> do
-          mchapter <- unsafeCompiler (chapterFor book p)
-          maybe (fail (ident ++ ": no chapter for page " ++ show p)) return mchapter
-        Nothing -> fail (ident ++ ": invalid 'page' field")
+      missue <- getMetadataField (itemIdentifier item) "issue"
+      case missue of
+        Just issue -> return issue
+        Nothing -> do
+          book <- fromMaybe "" <$> getMetadataField (itemIdentifier item) "book"
+          page <- getMetadataField (itemIdentifier item) "page"
+          let ident = toFilePath (itemIdentifier item)
+          case readMaybe =<< page of
+            Just p -> do
+              mchapter <- unsafeCompiler (chapterFor book p)
+              maybe (fail (ident ++ ": no chapter for page " ++ show p)) return mchapter
+            Nothing -> fail (ident ++ ": invalid 'page' field")
 
 
 --------------------------------------------------------------------------------
 -- Source browser (/sources.html)
 
 sourceBookOrder :: [String]
-sourceBookOrder = ["Paleo in a Nutshell", "Deadly Harvest"]
+sourceBookOrder = ["Paleo in a Nutshell", "Deadly Harvest", "The Bond Briefing"]
 
 -- | Build one rendered section per book, each containing its chapters
 -- and their quotes, each quote with back-links to its food pages.
@@ -264,17 +270,32 @@ buildSourceBooks = do
       return (book, readMaybe =<< page, q)
   mchapters <- unsafeCompiler loadChapters
   chaptersMap <- maybe (fail "sources/chapters.json missing or invalid") return mchapters
-  forM sourceBookOrder $ \book -> do
-    let chapters = Map.findWithDefault [] book chaptersMap
-        chapterRanges = zip chapters (drop 1 (map start chapters) ++ [maxBound])
-        bookQuotes = [(p, q) | (Just b, Just p, q) <- quoteTriples, b == book]
-        chapterQuoteLists = [ [q | (p, q) <- bookQuotes, start c <= p, p < next]
-                           | (c, next) <- chapterRanges ]
-    when (sum (map length chapterQuoteLists) /= length bookQuotes) $
-      fail (book ++ ": some quotes fall outside every chapter")
-    let chapterGroups = [ (chapter c, qs)
-                        | ((c, _), qs) <- zip chapterRanges chapterQuoteLists
-                        , not (null qs) ]
+  forM sourceBookOrder $ \book ->
+    if book == "The Bond Briefing"
+      then do
+        let bookQuotes = [q | (Just b, _, q) <- quoteTriples, b == book]
+        issues <- mapM (\q -> fromMaybe "Newsletter" <$> getMetadataField (itemIdentifier q) "issue")
+                       bookQuotes
+        let sortedPairs = sortOn fst (zip issues bookQuotes)
+            issueGroups = [ (maybe "" (fst . fst) (uncons gp), map snd gp)
+                         | gp <- groupBy (\a b -> fst a == fst b) sortedPairs ]
+        buildBriefingSections foodsByTag issueGroups
+      else do
+        let chapters = Map.findWithDefault [] book chaptersMap
+            chapterRanges = zip chapters (drop 1 (map start chapters) ++ [maxBound])
+            bookQuotes = [(p, q) | (Just b, Just p, q) <- quoteTriples, b == book]
+            chapterQuoteLists = [ [q | (p, q) <- bookQuotes, start c <= p, p < next]
+                               | (c, next) <- chapterRanges ]
+        when (sum (map length chapterQuoteLists) /= length bookQuotes) $
+          fail (book ++ ": some quotes fall outside every chapter")
+        let chapterGroups = [ (chapter c, qs)
+                            | ((c, _), qs) <- zip chapterRanges chapterQuoteLists
+                            , not (null qs) ]
+        buildBookSections book foodsByTag chapterGroups
+
+buildBookSections :: String -> [(String, Item String)] -> [(String, [Item String])]
+                  -> Compiler (Item String)
+buildBookSections book foodsByTag chapterGroups = do
     chapterItems <- forM chapterGroups $ \(cname, qs) -> do
       quoteItems <- mapM (buildQuoteItem foodsByTag) qs
       let ctx = constField "chapter" cname
@@ -282,6 +303,21 @@ buildSourceBooks = do
                 <> defaultContext
       makeItem "" >>= loadAndApplyTemplate "templates/sources-chapter.html" ctx
     let ctx = constField "book" book
+              <> listField "source-chapters" defaultContext (return chapterItems)
+              <> defaultContext
+    makeItem "" >>= loadAndApplyTemplate "templates/sources-book.html" ctx
+
+-- | Newsletter issues on the source browser: one section per issue.
+buildBriefingSections :: [(String, Item String)] -> [(String, [Item String])]
+                      -> Compiler (Item String)
+buildBriefingSections foodsByTag issueGroups = do
+    chapterItems <- forM issueGroups $ \(iss, qs) -> do
+      quoteItems <- mapM (buildQuoteItem foodsByTag) qs
+      let ctx = constField "chapter" iss
+                <> listField "chapter-quotes" defaultContext (return quoteItems)
+                <> defaultContext
+      makeItem "" >>= loadAndApplyTemplate "templates/sources-chapter.html" ctx
+    let ctx = constField "book" "The Bond Briefing"
               <> listField "source-chapters" defaultContext (return chapterItems)
               <> defaultContext
     makeItem "" >>= loadAndApplyTemplate "templates/sources-book.html" ctx
@@ -383,8 +419,13 @@ buildQuotesJson = do
       tags <- getTags (itemIdentifier q)
       page <- maybe (fail (ident ++ ": invalid 'page' field"))
                     return (readMaybe =<< mpage) :: Compiler Int
-      mchapter <- unsafeCompiler (chapterFor book page)
-      chapterTitle <- maybe (fail (ident ++ ": no chapter for page " ++ show page)) return mchapter
+      chapterTitle <- do
+        missue <- getMetadataField (itemIdentifier q) "issue"
+        case missue of
+          Just issue -> return issue
+          Nothing -> do
+            mchapter <- unsafeCompiler (chapterFor book page)
+            maybe (fail (ident ++ ": no chapter for page " ++ show page)) return mchapter
       let anchor = anchorOf q
       return $ object
         [ "book" .= book
