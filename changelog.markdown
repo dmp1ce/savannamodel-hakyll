@@ -8,6 +8,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 and versions follow [Semantic Versioning](https://semver.org/): MAJOR for
 redesigns, MINOR for new features, PATCH for fixes and content updates.
 
+## [2.0.16] - 2026-10-20
+
+### Changed
+- 98 more food pages now show quotes, through 100 curated alias tag
+  mappings on 125 quote passages (varieties inherit their base food's
+  quotes: breads←bread, coffees←coffee, sugars←sugar, wines←wine,
+  honeys←honey, waters←water, and so on). Quote-less food pages drop
+  from 291 to 193.
+
 ## [2.0.15] - 2026-10-20
 
 ### Changed
